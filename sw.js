@@ -1,4 +1,4 @@
-const CACHE_NAME = 'gastos-v2';
+const CACHE_NAME = 'gastos-v4';
 const ASSETS = [
   './',
   './index.html',

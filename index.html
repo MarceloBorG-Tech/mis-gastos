@@ -11,6 +11,7 @@
 <link rel="manifest" href="manifest.json">
 <title>Mis Gastos</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:       #0a0a0f;
@@ -35,484 +36,172 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
 html, body { height: 100%; overflow: hidden; background: var(--bg); }
-
 body {
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  display: flex;
-  flex-direction: column;
-  padding-top: var(--safe-top);
-  padding-bottom: var(--safe-bot);
+  color: var(--text); font-family: 'DM Sans', sans-serif;
+  display: flex; flex-direction: column;
+  padding-top: var(--safe-top); padding-bottom: var(--safe-bot);
 }
 
 /* ── HEADER ── */
-.header {
-  background: var(--bg);
-  padding: 1.1rem 1.4rem 0;
-  flex-shrink: 0;
-  position: relative;
-}
-
-.header-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1.4rem;
-}
-
-.logo {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.35rem;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
-
+.header { background: var(--bg); padding: 1.1rem 1.4rem 0; flex-shrink: 0; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.1rem; }
+.header-left { display: flex; flex-direction: column; }
+.logo { font-family: 'DM Serif Display', serif; font-size: 1.35rem; color: var(--text); letter-spacing: -0.01em; }
 .logo span { color: var(--gold); font-style: italic; }
+.header-month { font-size: 0.65rem; font-weight: 500; color: var(--muted2); letter-spacing: 0.08em; text-transform: uppercase; margin-top: 0.1rem; }
+.header-right { display: flex; align-items: center; gap: 0.5rem; }
 
-.header-month {
-  font-size: 0.7rem;
-  font-weight: 500;
-  color: var(--muted2);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
+/* Hamburger */
+.menu-btn { background: none; border: none; cursor: pointer; padding: 0.4rem; display: flex; flex-direction: column; gap: 4px; }
+.menu-btn span { display: block; width: 20px; height: 2px; background: var(--muted2); border-radius: 2px; transition: background 0.2s; }
+.menu-btn:active span { background: var(--gold); }
 
-/* Hero balance */
+/* Hero */
 .hero {
   background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-  border: 1px solid var(--border2);
-  border-radius: 20px;
-  padding: 1.4rem 1.5rem 1.2rem;
-  margin-bottom: 1rem;
-  position: relative;
-  overflow: hidden;
+  border: 1px solid var(--border2); border-radius: 20px;
+  padding: 1.2rem 1.5rem 1.2rem; margin-bottom: 1rem;
+  position: relative; overflow: hidden;
 }
-
 .hero::before {
-  content: '';
-  position: absolute;
-  top: -40px; right: -40px;
+  content: ''; position: absolute; top: -40px; right: -40px;
   width: 130px; height: 130px;
   background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
   border-radius: 50%;
 }
-
-.hero-label {
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted2);
-  margin-bottom: 0.3rem;
-}
-
-.hero-amount {
-  font-family: 'DM Serif Display', serif;
-  font-size: 2.6rem;
-  color: var(--text);
-  letter-spacing: -0.03em;
-  line-height: 1;
-  margin-bottom: 0.25rem;
-}
-
-.hero-sub {
-  font-size: 0.72rem;
-  color: var(--muted2);
-  margin-bottom: 1.1rem;
-}
-
-.hero-pills {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.pill {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  padding: 0.3rem 0.7rem;
-  border-radius: 99px;
-  font-size: 0.68rem;
-  font-weight: 600;
-  border: 1px solid;
-}
-
+.hero-greeting { font-size: 0.68rem; color: rgba(255,255,255,0.4); margin-bottom: 0.05rem; }
+.hero-label { font-size: 0.65rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.3rem; }
+.hero-amount { font-family: 'DM Serif Display', serif; font-size: 2.6rem; color: var(--text); letter-spacing: -0.03em; line-height: 1; margin-bottom: 0.25rem; }
+.hero-sub { font-size: 0.72rem; color: var(--muted2); margin-bottom: 1.1rem; }
+.hero-pills { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.pill { display: flex; align-items: center; gap: 0.3rem; padding: 0.3rem 0.7rem; border-radius: 99px; font-size: 0.68rem; font-weight: 600; border: 1px solid; }
 .pill.nec { background: var(--green-dim); border-color: rgba(62,207,142,0.2); color: var(--green); }
 .pill.des { background: var(--amber-dim); border-color: rgba(245,166,35,0.2); color: var(--amber); }
 .pill.aho { background: var(--blue-dim);  border-color: rgba(91,156,246,0.2); color: var(--blue); }
-
 .pill-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
 
 /* ── NAV ── */
-.nav {
-  display: flex;
-  background: var(--bg);
-  padding: 0 1.4rem;
-  gap: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
-}
+.nav { display: flex; background: var(--bg); padding: 0 1.4rem; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; border-bottom: 1px solid var(--border); }
 .nav::-webkit-scrollbar { display: none; }
-
-.nav-item {
-  padding: 0.7rem 0.9rem;
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--muted);
-  cursor: pointer;
-  border-bottom: 2px solid transparent;
-  white-space: nowrap;
-  transition: color 0.2s, border-color 0.2s;
-  letter-spacing: 0.02em;
-}
-
-.nav-item.active {
-  color: var(--gold);
-  border-bottom-color: var(--gold);
-}
+.nav-item { padding: 0.7rem 0.9rem; font-size: 0.72rem; font-weight: 600; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; transition: color 0.2s, border-color 0.2s; letter-spacing: 0.02em; }
+.nav-item.active { color: var(--gold); border-bottom-color: var(--gold); }
 
 /* ── CONTENT ── */
-.content {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 1.1rem 1.4rem;
-}
+.content { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1.1rem 1.4rem; }
 
 /* ── MONTH NAV ── */
-.month-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 0.55rem 0.8rem;
-}
-
-.month-nav button {
-  background: none;
-  border: none;
-  color: var(--muted2);
-  font-size: 1.1rem;
-  cursor: pointer;
-  padding: 0.2rem 0.5rem;
-  border-radius: 6px;
-  transition: color 0.15s, background 0.15s;
-  line-height: 1;
-}
-
+.month-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 0.55rem 0.8rem; }
+.month-nav button { background: none; border: none; color: var(--muted2); font-size: 1.1rem; cursor: pointer; padding: 0.2rem 0.5rem; border-radius: 6px; transition: color 0.15s, background 0.15s; line-height: 1; }
 .month-nav button:active { background: var(--surface2); color: var(--gold); }
-
-.month-nav .mnav-label {
-  font-family: 'DM Serif Display', serif;
-  font-size: 0.95rem;
-  color: var(--text);
-  letter-spacing: -0.01em;
-}
+.month-nav .mnav-label { font-family: 'DM Serif Display', serif; font-size: 0.95rem; color: var(--text); letter-spacing: -0.01em; }
 
 /* ── BALANCE CARD ── */
-.balance-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 1.2rem 1.3rem;
-  margin-bottom: 1.1rem;
-}
-
-.bc-header {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  margin-bottom: 0.2rem;
-}
-
-.bc-label {
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.bc-count {
-  font-size: 0.65rem;
-  color: var(--muted);
-}
-
-.bc-total {
-  font-family: 'DM Serif Display', serif;
-  font-size: 2rem;
-  letter-spacing: -0.02em;
-  color: var(--text);
-  margin-bottom: 1.1rem;
-  line-height: 1;
-}
-
+.balance-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 1.2rem 1.3rem; margin-bottom: 1.1rem; }
+.bc-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 0.2rem; }
+.bc-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.bc-count { font-size: 0.65rem; color: var(--muted); }
+.bc-total { font-family: 'DM Serif Display', serif; font-size: 2rem; letter-spacing: -0.02em; color: var(--text); margin-bottom: 1.1rem; line-height: 1; }
 .bc-rows { display: flex; flex-direction: column; gap: 0.75rem; }
-
-.bc-row-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.35rem;
-}
-
-.bc-row-label {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: var(--muted2);
-}
-
-.bc-row-right {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.bc-row-amt {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.bc-row-pct {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 4px;
-}
-
+.bc-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem; }
+.bc-row-label { font-size: 0.75rem; font-weight: 500; color: var(--muted2); }
+.bc-row-right { display: flex; align-items: center; gap: 0.5rem; }
+.bc-row-amt { font-size: 0.8rem; font-weight: 600; color: var(--text); }
+.bc-row-pct { font-size: 0.65rem; font-weight: 700; padding: 0.1rem 0.4rem; border-radius: 4px; }
 .bc-row-pct.ok  { background: var(--green-dim); color: var(--green); }
 .bc-row-pct.bad { background: rgba(240,96,96,0.1); color: var(--red); }
-
-.bar-track {
-  height: 4px;
-  background: var(--surface2);
-  border-radius: 99px;
-  overflow: hidden;
-}
-
+.bar-track { height: 4px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
 .bar-fill.nec { background: var(--green); }
 .bar-fill.des { background: var(--amber); }
 .bar-fill.aho { background: var(--blue); }
-
 .bc-divider { height: 1px; background: var(--border); margin: 1rem 0 0.8rem; }
-
 .bc-cats { display: flex; flex-direction: column; gap: 0.4rem; }
-
-.bc-cat-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
+.bc-cat-row { display: flex; justify-content: space-between; align-items: center; }
 .bc-cat-name { font-size: 0.75rem; color: var(--muted2); }
 .bc-cat-amt  { font-size: 0.75rem; font-weight: 600; color: var(--text); }
 
 /* ── ENTRIES ── */
-.section-label {
-  font-size: 0.62rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.65rem;
-}
-
+.section-label { font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.65rem; }
 .entry-list { display: flex; flex-direction: column; gap: 0.5rem; }
-
-.entry {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 0.85rem 1rem;
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  animation: fadeUp 0.22s ease both;
-  transition: border-color 0.2s;
-}
-
+.entry { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 0.85rem 1rem; display: flex; align-items: center; gap: 0.85rem; animation: fadeUp 0.22s ease both; transition: border-color 0.2s; }
 .entry:active { border-color: var(--border2); }
-
-.entry-ico {
-  width: 38px; height: 38px;
-  background: var(--surface2);
-  border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 1.15rem;
-  flex-shrink: 0;
-}
-
+.entry-ico { width: 38px; height: 38px; background: var(--surface2); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; flex-shrink: 0; }
 .entry-info { flex: 1; min-width: 0; }
-
-.entry-name {
-  font-size: 0.88rem;
-  font-weight: 500;
-  color: var(--text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 0.2rem;
-}
-
-.entry-meta {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-
-.entry-date {
-  font-size: 0.68rem;
-  color: var(--muted);
-}
-
-.chip {
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  padding: 0.08rem 0.4rem;
-  border-radius: 4px;
-}
-
+.entry-name { font-size: 0.88rem; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 0.2rem; }
+.entry-meta { display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap; }
+.entry-date { font-size: 0.68rem; color: var(--muted); }
+.chip { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 0.08rem 0.4rem; border-radius: 4px; }
 .chip.necesidad { background: var(--green-dim); color: var(--green); }
-.chip.deseo      { background: var(--amber-dim); color: var(--amber); }
-.chip.ahorro     { background: var(--blue-dim);  color: var(--blue); }
-
-.entry-right {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 0.3rem;
-}
-
-.entry-amount {
-  font-family: 'DM Serif Display', serif;
-  font-size: 1.05rem;
-  color: var(--text);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-}
-
-.del-btn {
-  background: none;
-  border: none;
-  color: var(--muted);
-  font-size: 0.75rem;
-  padding: 0.2rem 0.3rem;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: color 0.15s;
-  line-height: 1;
-}
-
+.chip.deseo     { background: var(--amber-dim); color: var(--amber); }
+.chip.ahorro    { background: var(--blue-dim);  color: var(--blue); }
+.entry-right { display: flex; flex-direction: column; align-items: flex-end; gap: 0.3rem; }
+.entry-amount { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--text); letter-spacing: -0.01em; white-space: nowrap; }
+.del-btn { background: none; border: none; color: var(--muted); font-size: 0.75rem; padding: 0.2rem 0.3rem; cursor: pointer; border-radius: 4px; transition: color 0.15s; line-height: 1; }
 .del-btn:active { color: var(--red); }
 
 /* ── EMPTY ── */
-.empty {
-  text-align: center;
-  padding: 3rem 1rem;
-}
-
-.empty-icon {
-  font-size: 2.5rem;
-  margin-bottom: 0.75rem;
-  opacity: 0.4;
-}
-
-.empty p {
-  font-size: 0.85rem;
-  color: var(--muted2);
-  line-height: 1.6;
-}
+.empty { text-align: center; padding: 3rem 1rem; }
+.empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.4; }
+.empty p { font-size: 0.85rem; color: var(--muted2); line-height: 1.6; }
 
 /* ── FORM ── */
 .field { margin-bottom: 0.9rem; }
-
-.field label {
-  display: block;
-  font-size: 0.65rem;
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--muted2);
-  margin-bottom: 0.4rem;
-}
-
-.field input, .field select {
-  width: 100%;
-  padding: 0.85rem 1rem;
-  background: var(--surface);
-  border: 1px solid var(--border2);
-  border-radius: 12px;
-  color: var(--text);
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
-}
-
+.field label { display: block; font-size: 0.65rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.4rem; }
+.field input, .field select { width: 100%; padding: 0.85rem 1rem; background: var(--surface); border: 1px solid var(--border2); border-radius: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.2s; -webkit-appearance: none; appearance: none; }
 .field input::placeholder { color: var(--muted); }
-
-.field input:focus, .field select:focus {
-  border-color: var(--gold);
-}
-
+.field input:focus, .field select:focus { border-color: var(--gold); }
 .field select option { background: #1c1c26; }
-
 .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-
-.add-btn {
-  width: 100%;
-  padding: 1rem;
-  background: var(--gold);
-  color: #0a0a0f;
-  border: none;
-  border-radius: 14px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 0.95rem;
-  font-weight: 700;
-  cursor: pointer;
-  margin-top: 0.25rem;
-  letter-spacing: 0.02em;
-  transition: opacity 0.2s, transform 0.15s;
-}
-
+.add-btn { width: 100%; padding: 1rem; background: var(--gold); color: #0a0a0f; border: none; border-radius: 14px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; margin-top: 0.25rem; letter-spacing: 0.02em; transition: opacity 0.2s, transform 0.15s; }
 .add-btn:active { opacity: 0.85; transform: scale(0.98); }
 
 /* ── TOAST ── */
-.toast {
-  position: fixed;
-  bottom: calc(1.5rem + var(--safe-bot));
-  left: 50%;
-  transform: translateX(-50%) translateY(16px);
-  background: var(--surface2);
-  color: var(--text);
-  border: 1px solid var(--border2);
-  padding: 0.6rem 1.4rem;
-  border-radius: 99px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  opacity: 0;
-  transition: opacity 0.25s, transform 0.25s;
-  pointer-events: none;
-  z-index: 999;
-  white-space: nowrap;
-}
-
+.toast { position: fixed; bottom: calc(1.5rem + var(--safe-bot)); left: 50%; transform: translateX(-50%) translateY(16px); background: var(--surface2); color: var(--text); border: 1px solid var(--border2); padding: 0.6rem 1.4rem; border-radius: 99px; font-size: 0.82rem; font-weight: 500; opacity: 0; transition: opacity 0.25s, transform 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── OVERLAY + DRAWER ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+.overlay.open { opacity: 1; pointer-events: all; }
+.drawer { position: fixed; top: 0; right: 0; width: min(320px, 88vw); height: 100%; background: var(--surface); z-index: 101; transform: translateX(100%); transition: transform 0.28s cubic-bezier(.4,0,.2,1); display: flex; flex-direction: column; overflow-y: auto; padding-top: var(--safe-top); padding-bottom: var(--safe-bot); }
+.drawer.open { transform: translateX(0); }
+.drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 1.2rem 1.4rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.drawer-title { font-family: 'DM Serif Display', serif; font-size: 1.1rem; color: var(--text); }
+.drawer-close { background: none; border: none; color: var(--muted2); font-size: 1.3rem; cursor: pointer; padding: 0.2rem 0.4rem; border-radius: 6px; line-height: 1; }
+.drawer-close:active { color: var(--gold); }
+.drawer-body { padding: 1.3rem 1.4rem; flex: 1; }
+.d-section { margin-bottom: 1.6rem; }
+.d-section-title { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin-bottom: 0.85rem; }
+.d-divider { height: 1px; background: var(--border); margin: 1.3rem 0; }
+
+/* Mi cuenta */
+.account-avatar { width: 50px; height: 50px; border-radius: 50%; background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); display: flex; align-items: center; justify-content: center; font-family: 'DM Serif Display', serif; font-size: 1.3rem; color: var(--gold); margin-bottom: 0.7rem; }
+.account-name-disp { font-family: 'DM Serif Display', serif; font-size: 1.05rem; color: var(--text); margin-bottom: 0.1rem; }
+.account-dob-disp { font-size: 0.7rem; color: var(--muted2); margin-bottom: 0.9rem; }
+
+.d-field { margin-bottom: 0.7rem; }
+.d-field label { display: block; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted2); margin-bottom: 0.3rem; }
+.d-field input { width: 100%; padding: 0.7rem 0.9rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; transition: border-color 0.2s; -webkit-appearance: none; }
+.d-field input:focus { border-color: var(--gold); }
+.d-field input::placeholder { color: var(--muted); }
+.d-save-btn { width: 100%; padding: 0.75rem; background: var(--gold); color: #0a0a0f; border: none; border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; margin-top: 0.2rem; transition: opacity 0.2s; }
+.d-save-btn:active { opacity: 0.8; }
+
+/* Porcentajes */
+.pct-row { display: flex; align-items: center; gap: 0.65rem; margin-bottom: 0.55rem; }
+.pct-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.pct-row-label { font-size: 0.78rem; color: var(--muted2); flex: 1; }
+.pct-input { width: 58px; padding: 0.5rem 0.5rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; text-align: center; transition: border-color 0.2s; -webkit-appearance: none; }
+.pct-input:focus { border-color: var(--gold); }
+.pct-suffix { font-size: 0.78rem; color: var(--muted); }
+.pct-total-row { font-size: 0.72rem; text-align: right; margin-top: 0.2rem; margin-bottom: 0.6rem; }
+.pct-total-row.ok  { color: var(--green); }
+.pct-total-row.bad { color: var(--red); }
+
+/* Exportar */
+.export-select { width: 100%; padding: 0.7rem 0.9rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: 10px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 0.88rem; outline: none; -webkit-appearance: none; margin-bottom: 0.7rem; }
+.export-btn { width: 100%; padding: 0.8rem; background: transparent; color: var(--green); border: 1px solid rgba(62,207,142,0.25); border-radius: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 700; cursor: pointer; transition: background 0.2s; }
+.export-btn:active { background: var(--green-dim); }
 
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(6px); }
@@ -522,13 +211,92 @@ body {
 </head>
 <body>
 
+<!-- OVERLAY -->
+<div class="overlay" id="overlay" onclick="cerrarMenu()"></div>
+
+<!-- DRAWER -->
+<div class="drawer" id="drawer">
+  <div class="drawer-header">
+    <span class="drawer-title">Menú</span>
+    <button class="drawer-close" onclick="cerrarMenu()">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- MI CUENTA -->
+    <div class="d-section" id="ds-cuenta">
+      <div class="d-section-title">Mi cuenta</div>
+      <div class="account-avatar" id="d-avatar">?</div>
+      <div class="account-name-disp" id="d-name-disp">—</div>
+      <div class="account-dob-disp" id="d-dob-disp"></div>
+      <div class="d-field">
+        <label>Nombre</label>
+        <input type="text" id="d-nombre" placeholder="Tu nombre">
+      </div>
+      <div class="d-field">
+        <label>Fecha de nacimiento</label>
+        <input type="date" id="d-dob">
+      </div>
+      <button class="d-save-btn" onclick="guardarCuenta()">Guardar</button>
+    </div>
+
+    <div class="d-divider"></div>
+
+    <!-- REGLA PORCENTAJES -->
+    <div class="d-section">
+      <div class="d-section-title">Regla de distribución</div>
+      <div class="pct-row">
+        <div class="pct-dot" style="background:var(--green)"></div>
+        <span class="pct-row-label">Necesidades</span>
+        <input class="pct-input" type="number" id="p-nec" min="0" max="100" value="50" oninput="actualizarTotal()">
+        <span class="pct-suffix">%</span>
+      </div>
+      <div class="pct-row">
+        <div class="pct-dot" style="background:var(--amber)"></div>
+        <span class="pct-row-label">Deseos</span>
+        <input class="pct-input" type="number" id="p-des" min="0" max="100" value="30" oninput="actualizarTotal()">
+        <span class="pct-suffix">%</span>
+      </div>
+      <div class="pct-row">
+        <div class="pct-dot" style="background:var(--blue)"></div>
+        <span class="pct-row-label">Ahorro / Deuda</span>
+        <input class="pct-input" type="number" id="p-aho" min="0" max="100" value="20" oninput="actualizarTotal()">
+        <span class="pct-suffix">%</span>
+      </div>
+      <div class="pct-total-row ok" id="pct-total-row">Total: 100% ✓</div>
+      <button class="d-save-btn" onclick="guardarPorcentajes()">Aplicar</button>
+    </div>
+
+    <div class="d-divider"></div>
+
+    <!-- EXPORTAR -->
+    <div class="d-section">
+      <div class="d-section-title">Exportar a Excel</div>
+      <select class="export-select" id="exp-rango">
+        <option value="mes">Solo este mes (</option>
+        <option value="todo">Historial completo</option>
+      </select>
+      <button class="export-btn" onclick="exportarExcel()">Descargar Excel</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- HEADER -->
 <div class="header">
   <div class="header-top">
-    <div class="logo">Flow<span>$</span></div>
-    <div class="header-month" id="monthLabel"></div>
+    <div class="header-left">
+      <div class="logo">Flow<span>$</span></div>
+      <div class="header-month" id="monthLabel"></div>
+    </div>
+    <div class="header-right">
+      <button class="menu-btn" onclick="abrirMenu()" aria-label="Menú">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </div>
 
   <div class="hero">
+    <div class="hero-greeting" id="hero-greeting"></div>
     <div class="hero-label">Gasto total del mes</div>
     <div class="hero-amount" id="s-total">$0</div>
     <div class="hero-sub" id="hero-sub">0 registros</div>
@@ -552,7 +320,9 @@ body {
 <div class="toast" id="toast"></div>
 
 <script>
-const STORAGE_KEY = 'gastos_pwa_v1';
+const STORAGE_KEY  = 'gastos_pwa_v1';
+const CUENTA_KEY   = 'gastos_cuenta_v1';
+const PCT_KEY      = 'gastos_pct_v1';
 const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
 
 let gastos = [];
@@ -561,14 +331,152 @@ const hoyInit = new Date();
 let mesFiltro  = hoyInit.getMonth();
 let anioFiltro = hoyInit.getFullYear();
 
+// Config
+let cuenta = { nombre: '', dob: '' };
+let pct    = { nec: 50, des: 30, aho: 20 };
+
+/* ── PERSISTENCIA ── */
 function cargar() {
   try { gastos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { gastos = []; }
+  try { const c = JSON.parse(localStorage.getItem(CUENTA_KEY)); if(c) cuenta = c; } catch(e) {}
+  try { const p = JSON.parse(localStorage.getItem(PCT_KEY)); if(p) pct = p; } catch(e) {}
 }
 
 function guardar() {
   try { localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos)); } catch(e) {}
 }
 
+/* ── DRAWER ── */
+function abrirMenu() {
+  // Populate fields
+  document.getElementById('d-nombre').value = cuenta.nombre || '';
+  document.getElementById('d-dob').value    = cuenta.dob || '';
+  document.getElementById('p-nec').value    = pct.nec;
+  document.getElementById('p-des').value    = pct.des;
+  document.getElementById('p-aho').value    = pct.aho;
+  actualizarTotal();
+  actualizarSelectExp();
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('drawer').classList.add('open');
+}
+
+function cerrarMenu() {
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('drawer').classList.remove('open');
+}
+
+function guardarCuenta() {
+  cuenta.nombre = document.getElementById('d-nombre').value.trim();
+  cuenta.dob    = document.getElementById('d-dob').value;
+  try { localStorage.setItem(CUENTA_KEY, JSON.stringify(cuenta)); } catch(e) {}
+  actualizarCuentaUI();
+  actualizarGreeting();
+  showToast('Cuenta guardada ✓');
+}
+
+function actualizarCuentaUI() {
+  const inicial = cuenta.nombre ? cuenta.nombre.charAt(0).toUpperCase() : '?';
+  document.getElementById('d-avatar').textContent = inicial;
+  document.getElementById('d-name-disp').textContent = cuenta.nombre || '—';
+  if (cuenta.dob) {
+    const d = new Date(cuenta.dob + 'T12:00:00');
+    document.getElementById('d-dob-disp').textContent = d.toLocaleDateString('es-CL', { day:'numeric', month:'long', year:'numeric' });
+  } else {
+    document.getElementById('d-dob-disp').textContent = '';
+  }
+}
+
+function actualizarGreeting() {
+  const el = document.getElementById('hero-greeting');
+  if (cuenta.nombre) {
+    const h = new Date().getHours();
+    const saludo = h < 12 ? 'Buenos días' : h < 20 ? 'Buenas tardes' : 'Buenas noches';
+    el.textContent = saludo + ', ' + cuenta.nombre;
+  } else {
+    el.textContent = '';
+  }
+}
+
+function guardarPorcentajes() {
+  const n = parseInt(document.getElementById('p-nec').value) || 0;
+  const d = parseInt(document.getElementById('p-des').value) || 0;
+  const a = parseInt(document.getElementById('p-aho').value) || 0;
+  if (n + d + a !== 100) { showToast('Los porcentajes deben sumar 100%'); return; }
+  pct = { nec: n, des: d, aho: a };
+  try { localStorage.setItem(PCT_KEY, JSON.stringify(pct)); } catch(e) {}
+  actualizarResumen();
+  render();
+  showToast('Porcentajes actualizados ✓');
+  cerrarMenu();
+}
+
+function actualizarTotal() {
+  const n = parseInt(document.getElementById('p-nec').value) || 0;
+  const d = parseInt(document.getElementById('p-des').value) || 0;
+  const a = parseInt(document.getElementById('p-aho').value) || 0;
+  const total = n + d + a;
+  const el = document.getElementById('pct-total-row');
+  el.textContent = 'Total: ' + total + '% ' + (total === 100 ? '✓' : '← debe ser 100');
+  el.className = 'pct-total-row ' + (total === 100 ? 'ok' : 'bad');
+}
+
+function actualizarSelectExp() {
+  const sel = document.getElementById('exp-rango');
+  sel.options[0].text = 'Solo este mes (' + MESES[mesFiltro] + ' ' + anioFiltro + ')';
+}
+
+/* ── EXPORTAR EXCEL ── */
+function exportarExcel() {
+  const rango = document.getElementById('exp-rango').value;
+  let lista = rango === 'mes' ? gastosFiltrados() : [...gastos];
+
+  if (lista.length === 0) { showToast('No hay datos para exportar'); return; }
+
+  const wb = XLSX.utils.book_new();
+
+  // Hoja de registros
+  const filas = lista.map(g => ({
+    'Fecha':       g.fecha,
+    'Descripción': g.desc,
+    'Categoría':   g.cat.split(' ').slice(1).join(' '),
+    'Tipo':        g.tipo === 'necesidad' ? 'Necesidad' : g.tipo === 'deseo' ? 'Deseo' : 'Ahorro',
+    'Monto':       g.amount
+  }));
+  const ws = XLSX.utils.json_to_sheet(filas);
+  ws['!cols'] = [{wch:12},{wch:28},{wch:16},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, ws, 'Registros');
+
+  // Hoja de resumen por mes
+  const porMes = {};
+  lista.forEach(g => {
+    const d = new Date(g.fecha + 'T12:00:00');
+    const k = MESES[d.getMonth()] + ' ' + d.getFullYear();
+    if (!porMes[k]) porMes[k] = { total:0, nec:0, des:0, aho:0 };
+    porMes[k].total += g.amount;
+    if (g.tipo === 'necesidad') porMes[k].nec += g.amount;
+    if (g.tipo === 'deseo')     porMes[k].des += g.amount;
+    if (g.tipo === 'ahorro')    porMes[k].aho += g.amount;
+  });
+  const filasRes = Object.entries(porMes).map(([mes, v]) => ({
+    'Mes': mes,
+    'Total': v.total,
+    'Necesidades': v.nec,
+    'Deseos': v.des,
+    'Ahorro': v.aho
+  }));
+  const ws2 = XLSX.utils.json_to_sheet(filasRes);
+  ws2['!cols'] = [{wch:16},{wch:12},{wch:14},{wch:10},{wch:10}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen mensual');
+
+  const nombre = rango === 'mes'
+    ? 'gastos-' + MESES[mesFiltro].toLowerCase() + '-' + anioFiltro + '.xlsx'
+    : 'gastos-historial.xlsx';
+
+  XLSX.writeFile(wb, nombre);
+  showToast('Excel descargado ✓');
+}
+
+/* ── UTILS ── */
 function fmt(n) {
   return '$' + parseFloat(n).toLocaleString('es-CL', {minimumFractionDigits:0, maximumFractionDigits:0});
 }
@@ -626,14 +534,14 @@ function renderBalance(lista) {
   const topCats = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).slice(0,4);
 
   const rows = [
-    { label:'Necesidades', val:nec, pct:pNec, meta:50, cls:'nec' },
-    { label:'Deseos',      val:des, pct:pDes, meta:30, cls:'des' },
-    { label:'Ahorro',      val:aho, pct:pAho, meta:20, cls:'aho' },
+    { label:'Necesidades', val:nec, pct:pNec, meta:pct.nec, cls:'nec' },
+    { label:'Deseos',      val:des, pct:pDes, meta:pct.des, cls:'des' },
+    { label:'Ahorro',      val:aho, pct:pAho, meta:pct.aho, cls:'aho' },
   ];
 
   return `<div class="balance-card">
     <div class="bc-header">
-      <span class="bc-label">Balance 50/30/20</span>
+      <span class="bc-label">Balance ${pct.nec}/${pct.des}/${pct.aho}</span>
       <span class="bc-count">${lista.length} movimientos</span>
     </div>
     <div class="bc-total">${fmt(total)}</div>
@@ -643,7 +551,7 @@ function renderBalance(lista) {
           <span class="bc-row-label">${r.label}</span>
           <div class="bc-row-right">
             <span class="bc-row-amt">${fmt(r.val)}</span>
-            <span class="bc-row-pct ${r.pct > r.meta ? 'bad':'ok'}">${r.pct}%</span>
+            <span class="bc-row-pct ${r.pct > r.meta ? 'bad':'ok'}">${r.pct}% <span style="opacity:0.6">(${r.meta}%)</span></span>
           </div>
         </div>
         <div class="bar-track"><div class="bar-fill ${r.cls}" style="width:${Math.min(r.pct,100)}%"></div></div>
@@ -688,11 +596,11 @@ function render() {
           <option value="💳 Deuda">💳 Deuda</option>
           <option value="📦 Otro">📦 Otro</option>
         </select></div>
-      <div class="field"><label>Tipo — Regla 50/30/20</label>
+      <div class="field"><label>Tipo — Regla ${pct.nec}/${pct.des}/${pct.aho}</label>
         <select id="f-tipo">
-          <option value="necesidad">Necesidad (50%)</option>
-          <option value="deseo">Deseo (30%)</option>
-          <option value="ahorro">Ahorro / Deuda (20%)</option>
+          <option value="necesidad">Necesidad (${pct.nec}%)</option>
+          <option value="deseo">Deseo (${pct.des}%)</option>
+          <option value="ahorro">Ahorro / Deuda (${pct.aho}%)</option>
         </select></div>
       <button class="add-btn" onclick="agregarGasto()">Registrar gasto</button>`;
     return;
@@ -776,7 +684,7 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(() => t.classList.remove('show'), 2200);
 }
 
 if ('serviceWorker' in navigator) {
@@ -786,6 +694,8 @@ if ('serviceWorker' in navigator) {
 cargar();
 setMes();
 actualizarResumen();
+actualizarCuentaUI();
+actualizarGreeting();
 render();
 </script>
 </body>
