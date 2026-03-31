@@ -1,0 +1,25 @@
+{
+  "name": "Mis Gastos",
+  "short_name": "Gastos",
+  "description": "Registra y controla tus gastos personales con la regla 50/30/20",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#1c1a16",
+  "theme_color": "#1c1a16",
+  "orientation": "portrait",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

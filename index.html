@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#1c1a16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Mis Gastos">
+<meta name="description" content="Registra y controla tus gastos personales">
+<link rel="manifest" href="manifest.json">
+<title>Mis Gastos</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f4ef;
+    --surface: #ffffff;
+    --border: #e5e0d8;
+    --dark: #1c1a16;
+    --muted: #9a9080;
+    --accent: #2d6a4f;
+    --accent2: #d4a017;
+    --accent3: #c0392b;
+    --accent4: #2980b9;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--dark);
+    font-family: 'Epilogue', sans-serif;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+
+  /* TOP BAR */
+  .topbar {
+    background: var(--dark);
+    color: white;
+    padding: 1rem 1.25rem 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+  }
+
+  .topbar h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .topbar .month {
+    font-size: 0.75rem;
+    opacity: 0.6;
+    font-weight: 500;
+  }
+
+  /* SUMMARY */
+  .summary {
+    background: var(--dark);
+    padding: 0 1.25rem 1.25rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.5rem;
+    flex-shrink: 0;
+  }
+
+  .sum-card {
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 0.6rem 0.5rem;
+    text-align: center;
+  }
+
+  .sum-label {
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.5);
+    margin-bottom: 0.2rem;
+  }
+
+  .sum-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: white;
+  }
+
+  .sum-amount.green { color: #6fcf97; }
+  .sum-amount.yellow { color: #f2c94c; }
+  .sum-amount.blue { color: #56ccf2; }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    gap: 0;
+    background: var(--surface);
+    border-bottom: 1.5px solid var(--border);
+    flex-shrink: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+
+  .tab {
+    flex: 1;
+    min-width: 70px;
+    padding: 0.7rem 0.5rem;
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab.active {
+    color: var(--dark);
+    border-bottom-color: var(--dark);
+  }
+
+  /* SCROLL CONTENT */
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem 1.25rem;
+  }
+
+  /* FORM */
+  .field {
+    margin-bottom: 0.85rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 0.35rem;
+  }
+
+  .field input, .field select {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+    color: var(--dark);
+    font-family: 'Epilogue', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+
+  .field input:focus, .field select:focus {
+    border-color: var(--accent);
+  }
+
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+  .add-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--dark);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 0.25rem;
+    letter-spacing: 0.03em;
+    transition: opacity 0.2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .add-btn:active { opacity: 0.8; }
+
+  /* ENTRIES */
+  .entry-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+  .entry {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    animation: slideIn 0.25s ease both;
+  }
+
+  .entry-icon { font-size: 1.5rem; min-width: 2rem; text-align: center; }
+
+  .entry-info { flex: 1; min-width: 0; }
+
+  .entry-name {
+    font-weight: 500;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .entry-meta {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    padding: 0.12rem 0.45rem;
+    border-radius: 99px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .tag.necesidad { background: #e8f5e9; color: #2d6a4f; }
+  .tag.deseo { background: #fff8e1; color: #c8840a; }
+  .tag.ahorro { background: #e3f2fd; color: #1a5276; }
+
+  .entry-right { text-align: right; }
+
+  .entry-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+  }
+
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    padding: 0.3rem;
+    cursor: pointer;
+    margin-top: 0.2rem;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--muted);
+  }
+
+  .empty-state .big { font-size: 3rem; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.9rem; line-height: 1.6; }
+
+  /* TOAST */
+  .toast {
+    position: fixed;
+    bottom: calc(1.5rem + var(--safe-bottom));
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--dark);
+    color: white;
+    padding: 0.65rem 1.5rem;
+    border-radius: 99px;
+    font-size: 0.85rem;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    z-index: 999;
+    white-space: nowrap;
+  }
+
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* INSTALL BANNER */
+  .install-banner {
+    margin-bottom: 1rem;
+    background: #e8f5e9;
+    border: 1.5px solid #a5d6a7;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    display: none;
+  }
+
+  .install-banner.visible { display: flex; }
+
+  .install-banner p { flex: 1; font-size: 0.82rem; color: #1b5e20; line-height: 1.4; }
+
+  .install-btn {
+    background: #2d6a4f;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div>
+    <div class="topbar h1" style="font-family:Syne,sans-serif;font-size:1.2rem;font-weight:800">💰 Mis Gastos</div>
+    <div class="month" id="monthLabel"></div>
+  </div>
+</div>
+
+<div class="summary">
+  <div class="sum-card">
+    <div class="sum-label">Total</div>
+    <div class="sum-amount" id="s-total">$0</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Necesid.</div>
+    <div class="sum-amount green" id="s-nec">$0</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Deseos</div>
+    <div class="sum-amount yellow" id="s-des">$0</div>
+  </div>
+  <div class="sum-card">
+    <div class="sum-label">Ahorro</div>
+    <div class="sum-amount blue" id="s-aho">$0</div>
+  </div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="setTab('lista', this)">📋 Registros</div>
+  <div class="tab" onclick="setTab('agregar', this)">➕ Agregar</div>
+  <div class="tab" onclick="setTab('necesidad', this)">🏠 Necesid.</div>
+  <div class="tab" onclick="setTab('deseo', this)">🎉 Deseos</div>
+  <div class="tab" onclick="setTab('ahorro', this)">💎 Ahorro</div>
+</div>
+
+<div class="content" id="content"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY = 'gastos_pwa_v1';
+let gastos = [];
+let tabActual = 'lista';
+
+function cargar() {
+  try { gastos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { gastos = []; }
+}
+
+function guardar() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(gastos)); } catch(e) {}
+}
+
+function fmt(n) {
+  return '$' + parseFloat(n).toLocaleString('es-MX', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+
+function setMes() {
+  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const hoy = new Date();
+  document.getElementById('monthLabel').textContent = meses[hoy.getMonth()] + ' ' + hoy.getFullYear();
+}
+
+function actualizarResumen() {
+  const total = gastos.reduce((s, g) => s + g.amount, 0);
+  const nec = gastos.filter(g => g.tipo === 'necesidad').reduce((s, g) => s + g.amount, 0);
+  const des = gastos.filter(g => g.tipo === 'deseo').reduce((s, g) => s + g.amount, 0);
+  const aho = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + g.amount, 0);
+  document.getElementById('s-total').textContent = fmt(total);
+  document.getElementById('s-nec').textContent = fmt(nec);
+  document.getElementById('s-des').textContent = fmt(des);
+  document.getElementById('s-aho').textContent = fmt(aho);
+}
+
+function setTab(tab, el) {
+  tabActual = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  render();
+}
+
+function render() {
+  const c = document.getElementById('content');
+
+  if (tabActual === 'agregar') {
+    const hoy = new Date().toISOString().split('T')[0];
+    c.innerHTML = `
+      <div class="field"><label>Descripción</label>
+        <input type="text" id="f-desc" placeholder="Ej: Súper, gasolina, renta…"></div>
+      <div class="row2">
+        <div class="field"><label>Monto ($)</label>
+          <input type="number" id="f-amount" placeholder="0" inputmode="decimal"></div>
+        <div class="field"><label>Fecha</label>
+          <input type="date" id="f-date" value="${hoy}"></div>
+      </div>
+      <div class="field"><label>Categoría</label>
+        <select id="f-cat">
+          <option value="🍔 Comida">🍔 Comida</option>
+          <option value="🏠 Hogar">🏠 Hogar</option>
+          <option value="🚗 Transporte">🚗 Transporte</option>
+          <option value="💊 Salud">💊 Salud</option>
+          <option value="🎬 Entretenimiento">🎬 Entretenimiento</option>
+          <option value="👗 Ropa">👗 Ropa</option>
+          <option value="📱 Suscripciones">📱 Suscripciones</option>
+          <option value="💰 Ahorro">💰 Ahorro</option>
+          <option value="💳 Deuda">💳 Deuda</option>
+          <option value="📦 Otro">📦 Otro</option>
+        </select></div>
+      <div class="field"><label>Tipo (Regla 50/30/20)</label>
+        <select id="f-tipo">
+          <option value="necesidad">🏠 Necesidad (50%)</option>
+          <option value="deseo">🎉 Deseo (30%)</option>
+          <option value="ahorro">💎 Ahorro / Deuda (20%)</option>
+        </select></div>
+      <button class="add-btn" onclick="agregarGasto()">✓ Registrar gasto</button>`;
+    return;
+  }
+
+  // Listas
+  let lista = tabActual === 'lista' ? [...gastos] : gastos.filter(g => g.tipo === tabActual);
+
+  if (lista.length === 0) {
+    c.innerHTML = `<div class="empty-state"><div class="big">📋</div><p>${tabActual === 'lista' ? 'Aún no hay registros.<br>Toca ➕ Agregar para empezar.' : 'No hay gastos aquí todavía.'}</p></div>`;
+    return;
+  }
+
+  c.innerHTML = `<div class="entry-list">${lista.map(g => {
+    const icon = g.cat.split(' ')[0];
+    const catNombre = g.cat.split(' ').slice(1).join(' ');
+    const fechaFmt = new Date(g.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
+    return `<div class="entry">
+      <div class="entry-icon">${icon}</div>
+      <div class="entry-info">
+        <div class="entry-name">${g.desc}</div>
+        <div class="entry-meta">
+          <span>${catNombre}</span><span>·</span><span>${fechaFmt}</span>
+          <span class="tag ${g.tipo}">${g.tipo === 'necesidad' ? 'Necesidad' : g.tipo === 'deseo' ? 'Deseo' : 'Ahorro'}</span>
+        </div>
+      </div>
+      <div class="entry-right">
+        <div class="entry-amount">${fmt(g.amount)}</div>
+        <button class="del-btn" onclick="eliminar(${g.id})">✕</button>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function agregarGasto() {
+  const desc = document.getElementById('f-desc')?.value.trim();
+  const amount = parseFloat(document.getElementById('f-amount')?.value);
+  const cat = document.getElementById('f-cat')?.value;
+  const tipo = document.getElementById('f-tipo')?.value;
+  const fecha = document.getElementById('f-date')?.value;
+
+  if (!desc || !amount || amount <= 0 || !fecha) { showToast('⚠️ Completa todos los campos'); return; }
+
+  gastos.unshift({ id: Date.now(), desc, amount, cat, tipo, fecha });
+  guardar();
+  actualizarResumen();
+  showToast('✅ Gasto registrado');
+
+  // Ir a lista
+  const tabs = document.querySelectorAll('.tab');
+  setTab('lista', tabs[0]);
+}
+
+function eliminar(id) {
+  gastos = gastos.filter(g => g.id !== id);
+  guardar();
+  actualizarResumen();
+  render();
+  showToast('🗑️ Eliminado');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+
+cargar();
+setMes();
+actualizarResumen();
+render();
+</script>
+</body>
+</html>
