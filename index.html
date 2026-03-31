@@ -3,527 +3,552 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#1c1a16">
+<meta name="theme-color" content="#0a0a0f">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Mis Gastos">
-<meta name="description" content="Registra y controla tus gastos personales">
 <link rel="manifest" href="manifest.json">
 <title>Mis Gastos</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --bg: #f7f4ef;
-    --surface: #ffffff;
-    --border: #e5e0d8;
-    --dark: #1c1a16;
-    --muted: #9a9080;
-    --accent: #2d6a4f;
-    --accent2: #d4a017;
-    --accent3: #c0392b;
-    --accent4: #2980b9;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  html, body {
-    height: 100%;
-    overflow: hidden;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--dark);
-    font-family: 'Epilogue', sans-serif;
-    display: flex;
-    flex-direction: column;
-    padding-top: var(--safe-top);
-    padding-bottom: var(--safe-bottom);
-  }
-
-  /* TOP BAR */
-  .topbar {
-    background: var(--dark);
-    color: white;
-    padding: 1rem 1.25rem 0.9rem;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-shrink: 0;
-  }
-
-  .topbar h1, .topbar-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.2rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
-
-  .topbar .month {
-    font-size: 0.75rem;
-    opacity: 0.6;
-    font-weight: 500;
-  }
-
-  /* SUMMARY */
-  .summary {
-    background: var(--dark);
-    padding: 0 1.25rem 1.25rem;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 0.5rem;
-    flex-shrink: 0;
-  }
-
-  .sum-card {
-    background: rgba(255,255,255,0.08);
-    border-radius: 10px;
-    padding: 0.6rem 0.5rem;
-    text-align: center;
-  }
-
-  .sum-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-    margin-bottom: 0.2rem;
-  }
-
-  .sum-amount {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: white;
-  }
-
-  .sum-amount.green { color: #6fcf97; }
-  .sum-amount.yellow { color: #f2c94c; }
-  .sum-amount.blue { color: #56ccf2; }
-
-  /* TABS */
-  .tabs {
-    display: flex;
-    gap: 0;
-    background: var(--surface);
-    border-bottom: 1.5px solid var(--border);
-    flex-shrink: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .tabs::-webkit-scrollbar { display: none; }
-
-  .tab {
-    flex: 1;
-    min-width: 70px;
-    padding: 0.7rem 0.5rem;
-    text-align: center;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--muted);
-    cursor: pointer;
-    border-bottom: 2.5px solid transparent;
-    transition: all 0.2s;
-    white-space: nowrap;
-  }
-
-  .tab.active {
-    color: var(--dark);
-    border-bottom-color: var(--dark);
-  }
-
-  /* SCROLL CONTENT */
-  .content {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 1rem 1.25rem;
-  }
-
-  /* FORM */
-  .field {
-    margin-bottom: 0.85rem;
-  }
-
-  .field label {
-    display: block;
-    font-size: 0.7rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: var(--muted);
-    font-weight: 600;
-    margin-bottom: 0.35rem;
-  }
-
-  .field input, .field select {
-    width: 100%;
-    padding: 0.8rem 1rem;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    background: var(--surface);
-    color: var(--dark);
-    font-family: 'Epilogue', sans-serif;
-    font-size: 1rem;
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-    appearance: none;
-  }
-
-  .field input:focus, .field select:focus {
-    border-color: var(--accent);
-  }
-
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-
-  .add-btn {
-    width: 100%;
-    padding: 1rem;
-    background: var(--dark);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    margin-top: 0.25rem;
-    letter-spacing: 0.03em;
-    transition: opacity 0.2s;
-    -webkit-tap-highlight-color: transparent;
-  }
-
-  .add-btn:active { opacity: 0.8; }
-
-  /* ENTRIES */
-  .entry-list { display: flex; flex-direction: column; gap: 0.6rem; }
-
-  .entry {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 14px;
-    padding: 0.9rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    animation: slideIn 0.25s ease both;
-  }
-
-  .entry-icon { font-size: 1.5rem; min-width: 2rem; text-align: center; }
-
-  .entry-info { flex: 1; min-width: 0; }
-
-  .entry-name {
-    font-weight: 500;
-    font-size: 0.95rem;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .entry-meta {
-    font-size: 0.72rem;
-    color: var(--muted);
-    margin-top: 0.2rem;
-    display: flex;
-    gap: 0.4rem;
-    align-items: center;
-    flex-wrap: wrap;
-  }
-
-  .tag {
-    padding: 0.12rem 0.45rem;
-    border-radius: 99px;
-    font-size: 0.65rem;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-    text-transform: uppercase;
-  }
-
-  .tag.necesidad { background: #e8f5e9; color: #2d6a4f; }
-  .tag.deseo { background: #fff8e1; color: #c8840a; }
-  .tag.ahorro { background: #e3f2fd; color: #1a5276; }
-
-  .entry-right { text-align: right; }
-
-  .entry-amount {
-    font-family: 'Syne', sans-serif;
-    font-size: 1rem;
-    font-weight: 700;
-  }
-
-  .del-btn {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 1.1rem;
-    padding: 0.3rem;
-    cursor: pointer;
-    margin-top: 0.2rem;
-  }
-
-  .empty-state {
-    text-align: center;
-    padding: 3rem 1rem;
-    color: var(--muted);
-  }
-
-  .empty-state .big { font-size: 3rem; margin-bottom: 0.75rem; }
-  .empty-state p { font-size: 0.9rem; line-height: 1.6; }
-
-  /* TOAST */
-  .toast {
-    position: fixed;
-    bottom: calc(1.5rem + var(--safe-bottom));
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--dark);
-    color: white;
-    padding: 0.65rem 1.5rem;
-    border-radius: 99px;
-    font-size: 0.85rem;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    opacity: 0;
-    transition: opacity 0.3s, transform 0.3s;
-    pointer-events: none;
-    z-index: 999;
-    white-space: nowrap;
-  }
-
-  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-  /* INSTALL BANNER */
-  .install-banner {
-    margin-bottom: 1rem;
-    background: #e8f5e9;
-    border: 1.5px solid #a5d6a7;
-    border-radius: 12px;
-    padding: 0.9rem 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    display: none;
-  }
-
-  .install-banner.visible { display: flex; }
-
-  .install-banner p { flex: 1; font-size: 0.82rem; color: #1b5e20; line-height: 1.4; }
-
-  .install-btn {
-    background: #2d6a4f;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    padding: 0.5rem 0.9rem;
-    font-family: 'Syne', sans-serif;
-    font-size: 0.78rem;
-    font-weight: 700;
-    cursor: pointer;
-    white-space: nowrap;
-  }
-
-  @keyframes slideIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* MONTH FILTER */
-  .month-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 1rem;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 0.5rem 0.75rem;
-  }
-
-  .month-nav button {
-    background: none;
-    border: none;
-    font-size: 1.1rem;
-    color: var(--dark);
-    cursor: pointer;
-    padding: 0.25rem 0.5rem;
-    border-radius: 8px;
-    transition: background 0.15s;
-  }
-
-  .month-nav button:active { background: var(--border); }
-
-  .month-nav .month-label {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    letter-spacing: -0.01em;
-  }
-
-  /* BALANCE CARD */
-  .balance-card {
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    border-radius: 16px;
-    padding: 1rem 1.1rem;
-    margin-bottom: 1rem;
-  }
-
-  .balance-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.75rem;
-  }
-
-  .balance-total {
-    font-family: 'Syne', sans-serif;
-    font-size: 1.9rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    color: var(--dark);
-    margin-bottom: 0.1rem;
-    line-height: 1;
-  }
-
-  .balance-count {
-    font-size: 0.75rem;
-    color: var(--muted);
-    margin-bottom: 1rem;
-  }
-
-  .balance-rows { display: flex; flex-direction: column; gap: 0.55rem; }
-
-  .balance-row {}
-
-  .balance-row-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 0.3rem;
-  }
-
-  .balance-row-label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    gap: 0.3rem;
-  }
-
-  .balance-row-pct {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: var(--muted);
-  }
-
-  .balance-row-amount {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.82rem;
-    font-weight: 700;
-  }
-
-  .bar-track {
-    height: 7px;
-    background: var(--border);
-    border-radius: 99px;
-    overflow: hidden;
-  }
-
-  .bar-fill {
-    height: 100%;
-    border-radius: 99px;
-    transition: width 0.5s ease;
-  }
-
-  .bar-fill.nec { background: #2d6a4f; }
-  .bar-fill.des { background: #d4a017; }
-  .bar-fill.aho { background: #2980b9; }
-
-  .balance-divider {
-    height: 1px;
-    background: var(--border);
-    margin: 0.85rem 0;
-  }
-
-  .balance-cats {
-    display: flex;
-    flex-direction: column;
-    gap: 0.35rem;
-  }
-
-  .balance-cat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.78rem;
-  }
-
-  .balance-cat-name { color: var(--muted); }
-
-  .balance-cat-amt {
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 0.78rem;
-  }
-
-  .section-title {
-    font-family: 'Syne', sans-serif;
-    font-size: 0.7rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 0.6rem;
-  }
+:root {
+  --bg:       #0a0a0f;
+  --surface:  #13131a;
+  --surface2: #1c1c26;
+  --border:   rgba(255,255,255,0.07);
+  --border2:  rgba(255,255,255,0.12);
+  --text:     #f0eff8;
+  --muted:    #5a5a72;
+  --muted2:   #8888a8;
+  --gold:     #c9a84c;
+  --gold-dim: rgba(201,168,76,0.12);
+  --green:    #3ecf8e;
+  --green-dim:rgba(62,207,142,0.1);
+  --amber:    #f5a623;
+  --amber-dim:rgba(245,166,35,0.1);
+  --blue:     #5b9cf6;
+  --blue-dim: rgba(91,156,246,0.1);
+  --red:      #f06060;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html, body { height: 100%; overflow: hidden; background: var(--bg); }
+
+body {
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  flex-direction: column;
+  padding-top: var(--safe-top);
+  padding-bottom: var(--safe-bot);
+}
+
+/* ── HEADER ── */
+.header {
+  background: var(--bg);
+  padding: 1.1rem 1.4rem 0;
+  flex-shrink: 0;
+  position: relative;
+}
+
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.4rem;
+}
+
+.logo {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.35rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+.logo span { color: var(--gold); font-style: italic; }
+
+.header-month {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Hero balance */
+.hero {
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 1.4rem 1.5rem 1.2rem;
+  margin-bottom: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -40px; right: -40px;
+  width: 130px; height: 130px;
+  background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+  border-radius: 50%;
+}
+
+.hero-label {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 0.3rem;
+}
+
+.hero-amount {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2.6rem;
+  color: var(--text);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.hero-sub {
+  font-size: 0.72rem;
+  color: var(--muted2);
+  margin-bottom: 1.1rem;
+}
+
+.hero-pills {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border: 1px solid;
+}
+
+.pill.nec { background: var(--green-dim); border-color: rgba(62,207,142,0.2); color: var(--green); }
+.pill.des { background: var(--amber-dim); border-color: rgba(245,166,35,0.2); color: var(--amber); }
+.pill.aho { background: var(--blue-dim);  border-color: rgba(91,156,246,0.2); color: var(--blue); }
+
+.pill-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; }
+
+/* ── NAV ── */
+.nav {
+  display: flex;
+  background: var(--bg);
+  padding: 0 1.4rem;
+  gap: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+}
+.nav::-webkit-scrollbar { display: none; }
+
+.nav-item {
+  padding: 0.7rem 0.9rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s, border-color 0.2s;
+  letter-spacing: 0.02em;
+}
+
+.nav-item.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+}
+
+/* ── CONTENT ── */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 1.1rem 1.4rem;
+}
+
+/* ── MONTH NAV ── */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.55rem 0.8rem;
+}
+
+.month-nav button {
+  background: none;
+  border: none;
+  color: var(--muted2);
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.month-nav button:active { background: var(--surface2); color: var(--gold); }
+
+.month-nav .mnav-label {
+  font-family: 'DM Serif Display', serif;
+  font-size: 0.95rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+
+/* ── BALANCE CARD ── */
+.balance-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 1.2rem 1.3rem;
+  margin-bottom: 1.1rem;
+}
+
+.bc-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 0.2rem;
+}
+
+.bc-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.bc-count {
+  font-size: 0.65rem;
+  color: var(--muted);
+}
+
+.bc-total {
+  font-family: 'DM Serif Display', serif;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin-bottom: 1.1rem;
+  line-height: 1;
+}
+
+.bc-rows { display: flex; flex-direction: column; gap: 0.75rem; }
+
+.bc-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.bc-row-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted2);
+}
+
+.bc-row-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bc-row-amt {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.bc-row-pct {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+}
+
+.bc-row-pct.ok  { background: var(--green-dim); color: var(--green); }
+.bc-row-pct.bad { background: rgba(240,96,96,0.1); color: var(--red); }
+
+.bar-track {
+  height: 4px;
+  background: var(--surface2);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+.bar-fill { height: 100%; border-radius: 99px; transition: width 0.6s cubic-bezier(.4,0,.2,1); }
+.bar-fill.nec { background: var(--green); }
+.bar-fill.des { background: var(--amber); }
+.bar-fill.aho { background: var(--blue); }
+
+.bc-divider { height: 1px; background: var(--border); margin: 1rem 0 0.8rem; }
+
+.bc-cats { display: flex; flex-direction: column; gap: 0.4rem; }
+
+.bc-cat-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bc-cat-name { font-size: 0.75rem; color: var(--muted2); }
+.bc-cat-amt  { font-size: 0.75rem; font-weight: 600; color: var(--text); }
+
+/* ── ENTRIES ── */
+.section-label {
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.65rem;
+}
+
+.entry-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+.entry {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  animation: fadeUp 0.22s ease both;
+  transition: border-color 0.2s;
+}
+
+.entry:active { border-color: var(--border2); }
+
+.entry-ico {
+  width: 38px; height: 38px;
+  background: var(--surface2);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.15rem;
+  flex-shrink: 0;
+}
+
+.entry-info { flex: 1; min-width: 0; }
+
+.entry-name {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 0.2rem;
+}
+
+.entry-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.entry-date {
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
+.chip {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0.08rem 0.4rem;
+  border-radius: 4px;
+}
+
+.chip.necesidad { background: var(--green-dim); color: var(--green); }
+.chip.deseo      { background: var(--amber-dim); color: var(--amber); }
+.chip.ahorro     { background: var(--blue-dim);  color: var(--blue); }
+
+.entry-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.3rem;
+}
+
+.entry-amount {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.05rem;
+  color: var(--text);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+}
+
+.del-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+  padding: 0.2rem 0.3rem;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: color 0.15s;
+  line-height: 1;
+}
+
+.del-btn:active { color: var(--red); }
+
+/* ── EMPTY ── */
+.empty {
+  text-align: center;
+  padding: 3rem 1rem;
+}
+
+.empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.4;
+}
+
+.empty p {
+  font-size: 0.85rem;
+  color: var(--muted2);
+  line-height: 1.6;
+}
+
+/* ── FORM ── */
+.field { margin-bottom: 0.9rem; }
+
+.field label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted2);
+  margin-bottom: 0.4rem;
+}
+
+.field input, .field select {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.field input::placeholder { color: var(--muted); }
+
+.field input:focus, .field select:focus {
+  border-color: var(--gold);
+}
+
+.field select option { background: #1c1c26; }
+
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+
+.add-btn {
+  width: 100%;
+  padding: 1rem;
+  background: var(--gold);
+  color: #0a0a0f;
+  border: none;
+  border-radius: 14px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.25rem;
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s, transform 0.15s;
+}
+
+.add-btn:active { opacity: 0.85; transform: scale(0.98); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed;
+  bottom: calc(1.5rem + var(--safe-bot));
+  left: 50%;
+  transform: translateX(-50%) translateY(16px);
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border2);
+  padding: 0.6rem 1.4rem;
+  border-radius: 99px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.25s, transform 0.25s;
+  pointer-events: none;
+  z-index: 999;
+  white-space: nowrap;
+}
+
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 </style>
 </head>
 <body>
 
-<div class="topbar">
-  <div>
-    <h1 class="topbar-title">💰 Mis Gastos</h1>
-    <div class="month" id="monthLabel"></div>
+<div class="header">
+  <div class="header-top">
+    <div class="logo">Flow<span>$</span></div>
+    <div class="header-month" id="monthLabel"></div>
+  </div>
+
+  <div class="hero">
+    <div class="hero-label">Gasto total del mes</div>
+    <div class="hero-amount" id="s-total">$0</div>
+    <div class="hero-sub" id="hero-sub">0 registros</div>
+    <div class="hero-pills">
+      <div class="pill nec"><div class="pill-dot"></div><span id="s-nec">$0</span> necesidades</div>
+      <div class="pill des"><div class="pill-dot"></div><span id="s-des">$0</span> deseos</div>
+      <div class="pill aho"><div class="pill-dot"></div><span id="s-aho">$0</span> ahorro</div>
+    </div>
   </div>
 </div>
 
-<div class="summary">
-  <div class="sum-card">
-    <div class="sum-label">Total</div>
-    <div class="sum-amount" id="s-total">$0</div>
-  </div>
-  <div class="sum-card">
-    <div class="sum-label">Necesid.</div>
-    <div class="sum-amount green" id="s-nec">$0</div>
-  </div>
-  <div class="sum-card">
-    <div class="sum-label">Deseos</div>
-    <div class="sum-amount yellow" id="s-des">$0</div>
-  </div>
-  <div class="sum-card">
-    <div class="sum-label">Ahorro</div>
-    <div class="sum-amount blue" id="s-aho">$0</div>
-  </div>
-</div>
-
-<div class="tabs">
-  <div class="tab active" onclick="setTab('lista', this)">📋 Registros</div>
-  <div class="tab" onclick="setTab('agregar', this)">➕ Agregar</div>
-  <div class="tab" onclick="setTab('necesidad', this)">🏠 Necesid.</div>
-  <div class="tab" onclick="setTab('deseo', this)">🎉 Deseos</div>
-  <div class="tab" onclick="setTab('ahorro', this)">💎 Ahorro</div>
+<div class="nav">
+  <div class="nav-item active" onclick="setTab('lista', this)">Registros</div>
+  <div class="nav-item" onclick="setTab('agregar', this)">+ Agregar</div>
+  <div class="nav-item" onclick="setTab('necesidad', this)">Necesidades</div>
+  <div class="nav-item" onclick="setTab('deseo', this)">Deseos</div>
+  <div class="nav-item" onclick="setTab('ahorro', this)">Ahorro</div>
 </div>
 
 <div class="content" id="content"></div>
-
 <div class="toast" id="toast"></div>
 
 <script>
@@ -532,10 +557,8 @@ const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto'
 
 let gastos = [];
 let tabActual = 'lista';
-
-// Mes activo (para filtro)
 const hoyInit = new Date();
-let mesFiltro = hoyInit.getMonth();
+let mesFiltro  = hoyInit.getMonth();
 let anioFiltro = hoyInit.getFullYear();
 
 function cargar() {
@@ -547,7 +570,7 @@ function guardar() {
 }
 
 function fmt(n) {
-  return '$' + parseFloat(n).toLocaleString('es-CL', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  return '$' + parseFloat(n).toLocaleString('es-CL', {minimumFractionDigits:0, maximumFractionDigits:0});
 }
 
 function gastosFiltrados() {
@@ -566,74 +589,74 @@ function cambiarMes(delta) {
 }
 
 function setMes() {
-  document.getElementById('monthLabel').textContent = MESES[hoyInit.getMonth()] + ' ' + hoyInit.getFullYear();
+  document.getElementById('monthLabel').textContent = MESES[hoyInit.getMonth()].toUpperCase() + ' ' + hoyInit.getFullYear();
 }
 
 function actualizarResumen() {
   const lista = gastosFiltrados();
-  const total = lista.reduce((s, g) => s + g.amount, 0);
-  const nec   = lista.filter(g => g.tipo === 'necesidad').reduce((s, g) => s + g.amount, 0);
-  const des   = lista.filter(g => g.tipo === 'deseo').reduce((s, g) => s + g.amount, 0);
-  const aho   = lista.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + g.amount, 0);
+  const total = lista.reduce((s,g) => s + g.amount, 0);
+  const nec   = lista.filter(g => g.tipo==='necesidad').reduce((s,g) => s + g.amount, 0);
+  const des   = lista.filter(g => g.tipo==='deseo').reduce((s,g) => s + g.amount, 0);
+  const aho   = lista.filter(g => g.tipo==='ahorro').reduce((s,g) => s + g.amount, 0);
   document.getElementById('s-total').textContent = fmt(total);
   document.getElementById('s-nec').textContent   = fmt(nec);
   document.getElementById('s-des').textContent   = fmt(des);
   document.getElementById('s-aho').textContent   = fmt(aho);
+  document.getElementById('hero-sub').textContent = lista.length + ' registro' + (lista.length!==1?'s':'') + ' · ' + MESES[mesFiltro] + ' ' + anioFiltro;
 }
 
 function setTab(tab, el) {
   tabActual = tab;
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   render();
 }
 
 function renderBalance(lista) {
-  const total = lista.reduce((s, g) => s + g.amount, 0);
-  const nec   = lista.filter(g => g.tipo === 'necesidad').reduce((s, g) => s + g.amount, 0);
-  const des   = lista.filter(g => g.tipo === 'deseo').reduce((s, g) => s + g.amount, 0);
-  const aho   = lista.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + g.amount, 0);
+  const total = lista.reduce((s,g) => s + g.amount, 0);
+  const nec   = lista.filter(g => g.tipo==='necesidad').reduce((s,g) => s + g.amount, 0);
+  const des   = lista.filter(g => g.tipo==='deseo').reduce((s,g) => s + g.amount, 0);
+  const aho   = lista.filter(g => g.tipo==='ahorro').reduce((s,g) => s + g.amount, 0);
+  const pNec  = total > 0 ? Math.round(nec/total*100) : 0;
+  const pDes  = total > 0 ? Math.round(des/total*100) : 0;
+  const pAho  = total > 0 ? Math.round(aho/total*100) : 0;
 
-  const pNec = total > 0 ? Math.round(nec / total * 100) : 0;
-  const pDes = total > 0 ? Math.round(des / total * 100) : 0;
-  const pAho = total > 0 ? Math.round(aho / total * 100) : 0;
-
-  // Top categorías
   const porCat = {};
-  lista.forEach(g => { porCat[g.cat] = (porCat[g.cat] || 0) + g.amount; });
-  const topCats = Object.entries(porCat).sort((a,b) => b[1]-a[1]).slice(0, 4);
+  lista.forEach(g => { porCat[g.cat] = (porCat[g.cat]||0) + g.amount; });
+  const topCats = Object.entries(porCat).sort((a,b)=>b[1]-a[1]).slice(0,4);
 
-  return `
-  <div class="balance-card">
-    <div class="balance-title">📊 Balance mensual</div>
-    <div class="balance-total">${fmt(total)}</div>
-    <div class="balance-count">${lista.length} registro${lista.length !== 1 ? 's' : ''} · ${MESES[mesFiltro]} ${anioFiltro}</div>
-    <div class="balance-rows">
-      ${[
-        { label: '🏠 Necesidades', key: 'nec', val: nec, pct: pNec, meta: 50, cls: 'nec' },
-        { label: '🎉 Deseos',      key: 'des', val: des, pct: pDes, meta: 30, cls: 'des' },
-        { label: '💎 Ahorro',      key: 'aho', val: aho, pct: pAho, meta: 20, cls: 'aho' },
-      ].map(r => `
-        <div class="balance-row">
-          <div class="balance-row-top">
-            <span class="balance-row-label">${r.label}</span>
-            <span style="display:flex;gap:0.5rem;align-items:baseline">
-              <span class="balance-row-amount">${fmt(r.val)}</span>
-              <span class="balance-row-pct">${r.pct}% <span style="color:${r.pct > r.meta ? '#c0392b' : '#2d6a4f'}">(meta ${r.meta}%)</span></span>
-            </span>
-          </div>
-          <div class="bar-track"><div class="bar-fill ${r.cls}" style="width:${Math.min(r.pct, 100)}%"></div></div>
-        </div>`).join('')}
+  const rows = [
+    { label:'Necesidades', val:nec, pct:pNec, meta:50, cls:'nec' },
+    { label:'Deseos',      val:des, pct:pDes, meta:30, cls:'des' },
+    { label:'Ahorro',      val:aho, pct:pAho, meta:20, cls:'aho' },
+  ];
+
+  return `<div class="balance-card">
+    <div class="bc-header">
+      <span class="bc-label">Balance 50/30/20</span>
+      <span class="bc-count">${lista.length} movimientos</span>
     </div>
-    ${topCats.length > 0 ? `
-    <div class="balance-divider"></div>
-    <div class="balance-title">Por categoría</div>
-    <div class="balance-cats">
-      ${topCats.map(([cat, amt]) => `
-        <div class="balance-cat-row">
-          <span class="balance-cat-name">${cat}</span>
-          <span class="balance-cat-amt">${fmt(amt)}</span>
-        </div>`).join('')}
+    <div class="bc-total">${fmt(total)}</div>
+    <div class="bc-rows">
+      ${rows.map(r => `<div>
+        <div class="bc-row-top">
+          <span class="bc-row-label">${r.label}</span>
+          <div class="bc-row-right">
+            <span class="bc-row-amt">${fmt(r.val)}</span>
+            <span class="bc-row-pct ${r.pct > r.meta ? 'bad':'ok'}">${r.pct}%</span>
+          </div>
+        </div>
+        <div class="bar-track"><div class="bar-fill ${r.cls}" style="width:${Math.min(r.pct,100)}%"></div></div>
+      </div>`).join('')}
+    </div>
+    ${topCats.length ? `
+    <div class="bc-divider"></div>
+    <div class="bc-label" style="margin-bottom:0.6rem">Top categorías</div>
+    <div class="bc-cats">
+      ${topCats.map(([cat,amt]) => `<div class="bc-cat-row">
+        <span class="bc-cat-name">${cat}</span>
+        <span class="bc-cat-amt">${fmt(amt)}</span>
+      </div>`).join('')}
     </div>` : ''}
   </div>`;
 }
@@ -645,9 +668,9 @@ function render() {
     const hoy = new Date().toISOString().split('T')[0];
     c.innerHTML = `
       <div class="field"><label>Descripción</label>
-        <input type="text" id="f-desc" placeholder="Ej: Súper, gasolina, renta…"></div>
+        <input type="text" id="f-desc" placeholder="Ej: Supermercado, gasolina…"></div>
       <div class="row2">
-        <div class="field"><label>Monto ($)</label>
+        <div class="field"><label>Monto</label>
           <input type="number" id="f-amount" placeholder="0" inputmode="decimal"></div>
         <div class="field"><label>Fecha</label>
           <input type="date" id="f-date" value="${hoy}"></div>
@@ -665,50 +688,50 @@ function render() {
           <option value="💳 Deuda">💳 Deuda</option>
           <option value="📦 Otro">📦 Otro</option>
         </select></div>
-      <div class="field"><label>Tipo (Regla 50/30/20)</label>
+      <div class="field"><label>Tipo — Regla 50/30/20</label>
         <select id="f-tipo">
-          <option value="necesidad">🏠 Necesidad (50%)</option>
-          <option value="deseo">🎉 Deseo (30%)</option>
-          <option value="ahorro">💎 Ahorro / Deuda (20%)</option>
+          <option value="necesidad">Necesidad (50%)</option>
+          <option value="deseo">Deseo (30%)</option>
+          <option value="ahorro">Ahorro / Deuda (20%)</option>
         </select></div>
-      <button class="add-btn" onclick="agregarGasto()">✓ Registrar gasto</button>`;
+      <button class="add-btn" onclick="agregarGasto()">Registrar gasto</button>`;
     return;
   }
 
-  // Filtrar por mes activo
   let listaBase = tabActual === 'lista'
     ? gastosFiltrados()
     : gastosFiltrados().filter(g => g.tipo === tabActual);
 
-  // Navegador de mes
-  const navMes = `
-    <div class="month-nav">
-      <button onclick="cambiarMes(-1)">‹</button>
-      <span class="month-label">${MESES[mesFiltro]} ${anioFiltro}</span>
-      <button onclick="cambiarMes(1)">›</button>
-    </div>`;
+  const navMes = `<div class="month-nav">
+    <button onclick="cambiarMes(-1)">‹</button>
+    <span class="mnav-label">${MESES[mesFiltro]} ${anioFiltro}</span>
+    <button onclick="cambiarMes(1)">›</button>
+  </div>`;
 
   if (listaBase.length === 0) {
-    c.innerHTML = navMes + `<div class="empty-state"><div class="big">📋</div><p>Sin registros en ${MESES[mesFiltro]}.<br>${tabActual === 'lista' ? 'Toca ➕ Agregar para empezar.' : 'Aún no hay gastos de este tipo.'}</p></div>`;
+    c.innerHTML = navMes + `<div class="empty">
+      <div class="empty-icon">◎</div>
+      <p>Sin registros en ${MESES[mesFiltro]}.<br>${tabActual==='lista'?'Toca "+ Agregar" para comenzar.':'Aún no hay gastos de este tipo.'}</p>
+    </div>`;
     return;
   }
 
-  // Balance solo en tab general
   const balanceHTML = tabActual === 'lista' ? renderBalance(listaBase) : '';
 
   const listaHTML = `
-    <div class="section-title">${listaBase.length} registro${listaBase.length !== 1 ? 's' : ''}</div>
+    <div class="section-label">${listaBase.length} registro${listaBase.length!==1?'s':''}</div>
     <div class="entry-list">${listaBase.map(g => {
-      const icon = g.cat.split(' ')[0];
-      const catNombre = g.cat.split(' ').slice(1).join(' ');
-      const fechaFmt = new Date(g.fecha + 'T12:00:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+      const icon     = g.cat.split(' ')[0];
+      const catNom   = g.cat.split(' ').slice(1).join(' ');
+      const fechaFmt = new Date(g.fecha+'T12:00:00').toLocaleDateString('es-CL',{day:'numeric',month:'short'});
+      const tipoLabel = g.tipo==='necesidad'?'Necesidad':g.tipo==='deseo'?'Deseo':'Ahorro';
       return `<div class="entry">
-        <div class="entry-icon">${icon}</div>
+        <div class="entry-ico">${icon}</div>
         <div class="entry-info">
           <div class="entry-name">${g.desc}</div>
           <div class="entry-meta">
-            <span>${catNombre}</span><span>·</span><span>${fechaFmt}</span>
-            <span class="tag ${g.tipo}">${g.tipo === 'necesidad' ? 'Necesidad' : g.tipo === 'deseo' ? 'Deseo' : 'Ahorro'}</span>
+            <span class="entry-date">${catNom} · ${fechaFmt}</span>
+            <span class="chip ${g.tipo}">${tipoLabel}</span>
           </div>
         </div>
         <div class="entry-right">
@@ -728,20 +751,17 @@ function agregarGasto() {
   const tipo   = document.getElementById('f-tipo')?.value;
   const fecha  = document.getElementById('f-date')?.value;
 
-  if (!desc || !amount || amount <= 0 || !fecha) { showToast('⚠️ Completa todos los campos'); return; }
+  if (!desc || !amount || amount <= 0 || !fecha) { showToast('Completa todos los campos'); return; }
 
-  // Actualizar filtro al mes del gasto recién agregado
-  const d = new Date(fecha + 'T12:00:00');
+  const d = new Date(fecha+'T12:00:00');
   mesFiltro  = d.getMonth();
   anioFiltro = d.getFullYear();
 
   gastos.unshift({ id: Date.now(), desc, amount, cat, tipo, fecha });
   guardar();
   actualizarResumen();
-  showToast('✅ Gasto registrado');
-
-  const tabs = document.querySelectorAll('.tab');
-  setTab('lista', tabs[0]);
+  showToast('Gasto registrado ✓');
+  setTab('lista', document.querySelectorAll('.nav-item')[0]);
 }
 
 function eliminar(id) {
@@ -749,7 +769,7 @@ function eliminar(id) {
   guardar();
   actualizarResumen();
   render();
-  showToast('🗑️ Eliminado');
+  showToast('Eliminado');
 }
 
 function showToast(msg) {
@@ -760,7 +780,7 @@ function showToast(msg) {
 }
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
 }
 
 cargar();
