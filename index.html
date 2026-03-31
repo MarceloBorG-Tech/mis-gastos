@@ -331,6 +331,159 @@
     from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  /* MONTH FILTER */
+  .month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .month-nav button {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: var(--dark);
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    transition: background 0.15s;
+  }
+
+  .month-nav button:active { background: var(--border); }
+
+  .month-nav .month-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  /* BALANCE CARD */
+  .balance-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 1rem 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .balance-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.75rem;
+  }
+
+  .balance-total {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.9rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--dark);
+    margin-bottom: 0.1rem;
+    line-height: 1;
+  }
+
+  .balance-count {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-bottom: 1rem;
+  }
+
+  .balance-rows { display: flex; flex-direction: column; gap: 0.55rem; }
+
+  .balance-row {}
+
+  .balance-row-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.3rem;
+  }
+
+  .balance-row-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .balance-row-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--muted);
+  }
+
+  .balance-row-amount {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+
+  .bar-track {
+    height: 7px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .bar-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  .bar-fill.nec { background: #2d6a4f; }
+  .bar-fill.des { background: #d4a017; }
+  .bar-fill.aho { background: #2980b9; }
+
+  .balance-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0.85rem 0;
+  }
+
+  .balance-cats {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+
+  .balance-cat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.78rem;
+  }
+
+  .balance-cat-name { color: var(--muted); }
+
+  .balance-cat-amt {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+  }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
 </style>
 </head>
 <body>
@@ -375,8 +528,15 @@
 
 <script>
 const STORAGE_KEY = 'gastos_pwa_v1';
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
 let gastos = [];
 let tabActual = 'lista';
+
+// Mes activo (para filtro)
+const hoyInit = new Date();
+let mesFiltro = hoyInit.getMonth();
+let anioFiltro = hoyInit.getFullYear();
 
 function cargar() {
   try { gastos = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e) { gastos = []; }
@@ -387,24 +547,38 @@ function guardar() {
 }
 
 function fmt(n) {
-  return '$' + parseFloat(n).toLocaleString('es-MX', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+  return '$' + parseFloat(n).toLocaleString('es-CL', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+}
+
+function gastosFiltrados() {
+  return gastos.filter(g => {
+    const d = new Date(g.fecha + 'T12:00:00');
+    return d.getMonth() === mesFiltro && d.getFullYear() === anioFiltro;
+  });
+}
+
+function cambiarMes(delta) {
+  mesFiltro += delta;
+  if (mesFiltro > 11) { mesFiltro = 0; anioFiltro++; }
+  if (mesFiltro < 0)  { mesFiltro = 11; anioFiltro--; }
+  actualizarResumen();
+  render();
 }
 
 function setMes() {
-  const meses = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-  const hoy = new Date();
-  document.getElementById('monthLabel').textContent = meses[hoy.getMonth()] + ' ' + hoy.getFullYear();
+  document.getElementById('monthLabel').textContent = MESES[hoyInit.getMonth()] + ' ' + hoyInit.getFullYear();
 }
 
 function actualizarResumen() {
-  const total = gastos.reduce((s, g) => s + g.amount, 0);
-  const nec = gastos.filter(g => g.tipo === 'necesidad').reduce((s, g) => s + g.amount, 0);
-  const des = gastos.filter(g => g.tipo === 'deseo').reduce((s, g) => s + g.amount, 0);
-  const aho = gastos.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + g.amount, 0);
+  const lista = gastosFiltrados();
+  const total = lista.reduce((s, g) => s + g.amount, 0);
+  const nec   = lista.filter(g => g.tipo === 'necesidad').reduce((s, g) => s + g.amount, 0);
+  const des   = lista.filter(g => g.tipo === 'deseo').reduce((s, g) => s + g.amount, 0);
+  const aho   = lista.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + g.amount, 0);
   document.getElementById('s-total').textContent = fmt(total);
-  document.getElementById('s-nec').textContent = fmt(nec);
-  document.getElementById('s-des').textContent = fmt(des);
-  document.getElementById('s-aho').textContent = fmt(aho);
+  document.getElementById('s-nec').textContent   = fmt(nec);
+  document.getElementById('s-des').textContent   = fmt(des);
+  document.getElementById('s-aho').textContent   = fmt(aho);
 }
 
 function setTab(tab, el) {
@@ -412,6 +586,56 @@ function setTab(tab, el) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
   render();
+}
+
+function renderBalance(lista) {
+  const total = lista.reduce((s, g) => s + g.amount, 0);
+  const nec   = lista.filter(g => g.tipo === 'necesidad').reduce((s, g) => s + g.amount, 0);
+  const des   = lista.filter(g => g.tipo === 'deseo').reduce((s, g) => s + g.amount, 0);
+  const aho   = lista.filter(g => g.tipo === 'ahorro').reduce((s, g) => s + g.amount, 0);
+
+  const pNec = total > 0 ? Math.round(nec / total * 100) : 0;
+  const pDes = total > 0 ? Math.round(des / total * 100) : 0;
+  const pAho = total > 0 ? Math.round(aho / total * 100) : 0;
+
+  // Top categorías
+  const porCat = {};
+  lista.forEach(g => { porCat[g.cat] = (porCat[g.cat] || 0) + g.amount; });
+  const topCats = Object.entries(porCat).sort((a,b) => b[1]-a[1]).slice(0, 4);
+
+  return `
+  <div class="balance-card">
+    <div class="balance-title">📊 Balance mensual</div>
+    <div class="balance-total">${fmt(total)}</div>
+    <div class="balance-count">${lista.length} registro${lista.length !== 1 ? 's' : ''} · ${MESES[mesFiltro]} ${anioFiltro}</div>
+    <div class="balance-rows">
+      ${[
+        { label: '🏠 Necesidades', key: 'nec', val: nec, pct: pNec, meta: 50, cls: 'nec' },
+        { label: '🎉 Deseos',      key: 'des', val: des, pct: pDes, meta: 30, cls: 'des' },
+        { label: '💎 Ahorro',      key: 'aho', val: aho, pct: pAho, meta: 20, cls: 'aho' },
+      ].map(r => `
+        <div class="balance-row">
+          <div class="balance-row-top">
+            <span class="balance-row-label">${r.label}</span>
+            <span style="display:flex;gap:0.5rem;align-items:baseline">
+              <span class="balance-row-amount">${fmt(r.val)}</span>
+              <span class="balance-row-pct">${r.pct}% <span style="color:${r.pct > r.meta ? '#c0392b' : '#2d6a4f'}">(meta ${r.meta}%)</span></span>
+            </span>
+          </div>
+          <div class="bar-track"><div class="bar-fill ${r.cls}" style="width:${Math.min(r.pct, 100)}%"></div></div>
+        </div>`).join('')}
+    </div>
+    ${topCats.length > 0 ? `
+    <div class="balance-divider"></div>
+    <div class="balance-title">Por categoría</div>
+    <div class="balance-cats">
+      ${topCats.map(([cat, amt]) => `
+        <div class="balance-cat-row">
+          <span class="balance-cat-name">${cat}</span>
+          <span class="balance-cat-amt">${fmt(amt)}</span>
+        </div>`).join('')}
+    </div>` : ''}
+  </div>`;
 }
 
 function render() {
@@ -451,50 +675,71 @@ function render() {
     return;
   }
 
-  // Listas
-  let lista = tabActual === 'lista' ? [...gastos] : gastos.filter(g => g.tipo === tabActual);
+  // Filtrar por mes activo
+  let listaBase = tabActual === 'lista'
+    ? gastosFiltrados()
+    : gastosFiltrados().filter(g => g.tipo === tabActual);
 
-  if (lista.length === 0) {
-    c.innerHTML = `<div class="empty-state"><div class="big">📋</div><p>${tabActual === 'lista' ? 'Aún no hay registros.<br>Toca ➕ Agregar para empezar.' : 'No hay gastos aquí todavía.'}</p></div>`;
+  // Navegador de mes
+  const navMes = `
+    <div class="month-nav">
+      <button onclick="cambiarMes(-1)">‹</button>
+      <span class="month-label">${MESES[mesFiltro]} ${anioFiltro}</span>
+      <button onclick="cambiarMes(1)">›</button>
+    </div>`;
+
+  if (listaBase.length === 0) {
+    c.innerHTML = navMes + `<div class="empty-state"><div class="big">📋</div><p>Sin registros en ${MESES[mesFiltro]}.<br>${tabActual === 'lista' ? 'Toca ➕ Agregar para empezar.' : 'Aún no hay gastos de este tipo.'}</p></div>`;
     return;
   }
 
-  c.innerHTML = `<div class="entry-list">${lista.map(g => {
-    const icon = g.cat.split(' ')[0];
-    const catNombre = g.cat.split(' ').slice(1).join(' ');
-    const fechaFmt = new Date(g.fecha + 'T12:00:00').toLocaleDateString('es-MX', { day: 'numeric', month: 'short' });
-    return `<div class="entry">
-      <div class="entry-icon">${icon}</div>
-      <div class="entry-info">
-        <div class="entry-name">${g.desc}</div>
-        <div class="entry-meta">
-          <span>${catNombre}</span><span>·</span><span>${fechaFmt}</span>
-          <span class="tag ${g.tipo}">${g.tipo === 'necesidad' ? 'Necesidad' : g.tipo === 'deseo' ? 'Deseo' : 'Ahorro'}</span>
+  // Balance solo en tab general
+  const balanceHTML = tabActual === 'lista' ? renderBalance(listaBase) : '';
+
+  const listaHTML = `
+    <div class="section-title">${listaBase.length} registro${listaBase.length !== 1 ? 's' : ''}</div>
+    <div class="entry-list">${listaBase.map(g => {
+      const icon = g.cat.split(' ')[0];
+      const catNombre = g.cat.split(' ').slice(1).join(' ');
+      const fechaFmt = new Date(g.fecha + 'T12:00:00').toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
+      return `<div class="entry">
+        <div class="entry-icon">${icon}</div>
+        <div class="entry-info">
+          <div class="entry-name">${g.desc}</div>
+          <div class="entry-meta">
+            <span>${catNombre}</span><span>·</span><span>${fechaFmt}</span>
+            <span class="tag ${g.tipo}">${g.tipo === 'necesidad' ? 'Necesidad' : g.tipo === 'deseo' ? 'Deseo' : 'Ahorro'}</span>
+          </div>
         </div>
-      </div>
-      <div class="entry-right">
-        <div class="entry-amount">${fmt(g.amount)}</div>
-        <button class="del-btn" onclick="eliminar(${g.id})">✕</button>
-      </div>
-    </div>`;
-  }).join('')}</div>`;
+        <div class="entry-right">
+          <div class="entry-amount">${fmt(g.amount)}</div>
+          <button class="del-btn" onclick="eliminar(${g.id})">✕</button>
+        </div>
+      </div>`;
+    }).join('')}</div>`;
+
+  c.innerHTML = navMes + balanceHTML + listaHTML;
 }
 
 function agregarGasto() {
-  const desc = document.getElementById('f-desc')?.value.trim();
+  const desc   = document.getElementById('f-desc')?.value.trim();
   const amount = parseFloat(document.getElementById('f-amount')?.value);
-  const cat = document.getElementById('f-cat')?.value;
-  const tipo = document.getElementById('f-tipo')?.value;
-  const fecha = document.getElementById('f-date')?.value;
+  const cat    = document.getElementById('f-cat')?.value;
+  const tipo   = document.getElementById('f-tipo')?.value;
+  const fecha  = document.getElementById('f-date')?.value;
 
   if (!desc || !amount || amount <= 0 || !fecha) { showToast('⚠️ Completa todos los campos'); return; }
+
+  // Actualizar filtro al mes del gasto recién agregado
+  const d = new Date(fecha + 'T12:00:00');
+  mesFiltro  = d.getMonth();
+  anioFiltro = d.getFullYear();
 
   gastos.unshift({ id: Date.now(), desc, amount, cat, tipo, fecha });
   guardar();
   actualizarResumen();
   showToast('✅ Gasto registrado');
 
-  // Ir a lista
   const tabs = document.querySelectorAll('.tab');
   setTab('lista', tabs[0]);
 }
@@ -514,7 +759,6 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2000);
 }
 
-// Service Worker
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
 }
